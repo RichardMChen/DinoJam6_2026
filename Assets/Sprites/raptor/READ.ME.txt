@@ -1,0 +1,41 @@
+Thanks for downloading my little raptor!
+
+## SPRITE SIZE
+
+Native size: **64 × 64 px**
+
+For larger sizes, use **Nearest Neighbor / Integer Scaling** to keep the pixels crisp.
+
+Feel free to **play around with the frame times** to find the perfect animation speed for your game!
+
+## ANIMATIONS
+
+* Idle
+* Walk
+* Attack
+* Special – Pounce
+* Hurt
+* Death
+* Death Idle
+
+Yes, the death animation has a tiny plant. He’s doing his best.
+
+## FILES
+
+* Individual PNG frames
+* PNG spritesheets
+* Editable Aseprite source file
+
+## USAGE
+
+Free to use and modify in personal or commercial games, projects, prototypes and other creative works.
+
+Credit to **kamisprite** is appreciated, but not required.
+
+Please do **not** resell or redistribute the asset itself, include it in another asset pack, claim the original artwork as your own, or use it for NFTs.
+
+Using it as part of a finished commercial game or project is absolutely fine!
+
+If you make something with him, I’d love to see it. :)
+
+– kamisprite
