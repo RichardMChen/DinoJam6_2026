@@ -1,0 +1,105 @@
+using System.Collections;
+using UnityEngine;
+
+public class EnemyAttackControls : MonoBehaviour
+{
+    public Animator animator;
+    
+    [Header("Attack properties")]
+    public GameObject attackPoint;
+    public float attackPointRadius;
+    public LayerMask enemyLayer;
+    public float attackDamage = 1.0f;
+    public float attackCooldown = 0.5f; //The cooldown time between attacks    
+    public float attackCooldownMin = 1.0f;
+    public float attackCooldownMax = 2.0f;
+    [SerializeField] private float attackCooldownTimer = 0f; //Timer to keep track of the cooldown duration
+    public bool canAttack = false;
+    public bool isAttacking = false;
+
+    [Header("Sound")]
+    [SerializeField] AudioSource audioSourceRef;
+    [SerializeField] AudioClip attackSound;
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (attackCooldownTimer > 0)
+        {
+            attackCooldownTimer -= Time.deltaTime;
+        }
+        else
+        {
+            canAttack = true;
+        }
+    }
+
+    public void Attack()
+    {
+        if (canAttack)
+        {
+            animator.SetBool("isAttacking", true);
+            isAttacking = true;
+            PlayAttackSound();
+        }
+    }
+
+    public void AttackDamageCollision()
+    {
+        Collider2D[] enemy = Physics2D.OverlapCircleAll(attackPoint.transform.position, attackPointRadius, enemyLayer);
+
+        foreach (Collider2D enemyObj in enemy)
+        {
+            if (!enemyObj.GetComponent<CharacterBase>().isDead)
+            {
+                enemyObj.GetComponent<IDamageInterface>().TakeDamage(attackDamage);
+            }
+        }
+    }
+
+    public void EndAttack()
+    {
+        animator.SetBool("isAttacking", false);
+        //attackCooldownTimer = attackCooldown;
+        attackCooldownTimer = Random.Range(attackCooldownMin, attackCooldownMax);
+        canAttack = false;
+        isAttacking = false;
+    }
+
+    public void PlayAttackSound()
+    {
+        if (audioSourceRef && attackSound && !audioSourceRef.isPlaying)
+        {
+            audioSourceRef.PlayOneShot(attackSound, 0.5f);
+        }
+    }
+
+    //private bool attackSoundPlaying = false;
+    //IEnumerator PlayAttackSoundCo()
+    //{
+    //    if (attackSoundPlaying)
+    //    {
+    //        yield return null;
+    //    }
+
+    //    if (audioSourceRef && attackSound)
+    //    {
+    //        audioSourceRef.PlayOneShot(attackSound, 0.5f);
+    //        attackSoundPlaying = true;
+    //    }
+
+    //    yield return new WaitForSeconds(3.5f);
+    //    attackSoundPlaying = false;
+    //}
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.DrawWireSphere(attackPoint.transform.position, attackPointRadius);
+    }
+}

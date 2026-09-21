@@ -9,6 +9,32 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement")]
     public float movementSpeed = 5f;
     private float horizontalMovement;
+    public bool canMove = true;
+    public enum movementDirectionEnum { Left, Right };
+    private movementDirectionEnum _movementDirection;
+    private Vector2 movementDirectionVector = Vector2.right;
+
+    public movementDirectionEnum movementDirection
+    {
+        get { return _movementDirection; }
+        set
+        {
+            if (_movementDirection != value)
+            {
+                gameObject.transform.localScale = new Vector2(gameObject.transform.localScale.x * -1, gameObject.transform.localScale.y);
+
+                if (value == movementDirectionEnum.Left)
+                {
+                    movementDirectionVector = Vector2.left;
+                }
+                else if (value == movementDirectionEnum.Right)
+                {
+                    movementDirectionVector = Vector2.right;
+                }
+            }
+            _movementDirection = value;
+        }
+    }
 
     [Header("Jumping")]
     public float jumpPower = 10f;
@@ -19,28 +45,56 @@ public class PlayerMovement : MonoBehaviour
     public Transform groundCheckPos;
     public Vector2 groundCheckSize = new Vector2(0.5f, 0.5f);
     public LayerMask groundLayer;
-
-    public bool isGrounded = false; //test
+    public bool isGrounded = false;
 
     [Header("Gravity")]
     public float baseGravity = 2f;
     public float maxFallSpeed = 18f;
     public float fallSpeedMultiplier = 2f;
 
+    [Header("Sound")]
+    [SerializeField] AudioSource audioSourceRef;
+    [SerializeField] AudioClip footStepSound;
+    [SerializeField] AudioClip attackSound;
+
     //For testing box casting
     //public Vector2 boxSize;
     //public float castDistance;
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        rb.linearVelocity = new Vector2(horizontalMovement * movementSpeed, rb.linearVelocity.y);
+        if (!GameManager.instance.canFight || GameManager.instance.isGamePaused)
+        {
+            audioSourceRef.mute = true;
+            return;
+        }
+
+        if (isGrounded)
+        {
+            rb.linearVelocity = new Vector2(horizontalMovement * movementSpeed, rb.linearVelocity.y);
+        }
+        else
+        {
+
+        }
+        //rb.linearVelocity = new Vector2(horizontalMovement * movementSpeed, rb.linearVelocity.y);
+
         GroundCheck();
         Gravity();
         //animator.SetFloat("yVelocity", rb.linearVelocity.y);
         //animator.SetFloat("magnitude", horizontalMovement);
         animator.SetFloat("magnitude", rb.linearVelocity.magnitude);
         //Debug.Log(jumpsRemaining);
+
+        //Set direction to face the target
+        if (transform.position.x < GameManager.instance.player2.gameObject.transform.position.x)
+        {
+            movementDirection = movementDirectionEnum.Left;
+        }
+        else
+        {
+            movementDirection = movementDirectionEnum.Right;
+        }
     }
 
     public void Move(InputAction.CallbackContext context)
@@ -50,6 +104,11 @@ public class PlayerMovement : MonoBehaviour
 
     public void Jump(InputAction.CallbackContext context)
     {
+        if (!GameManager.instance.canFight || GameManager.instance.isGamePaused)
+        {
+            return;
+        }
+
         if (jumpsRemaining > 0)
         {
             if (context.performed) //Hold down jump button
@@ -106,6 +165,15 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireCube(groundCheckPos.position, groundCheckSize);
 
         //Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize); //Draw box cast
+    }
+
+    public void PlayFootStepSound()
+    {
+        if (audioSourceRef && footStepSound)
+        {
+            //audioSourceRef.clip = footStepSound;
+            audioSourceRef.PlayOneShot(footStepSound, 1.0f);
+        }
     }
 
     //private void OnCollisionEnter2D(Collision2D other)
